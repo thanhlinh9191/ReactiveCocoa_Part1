@@ -70,6 +70,11 @@
     [signUpActiveSignal subscribeNext:^(NSNumber *signupActive) {
         self.signInButton.enabled = [signupActive boolValue];
     }];
+    
+    //B4. Singal for control events
+    [[self.signInButton rac_signalForControlEvents:UIControlEventTouchUpInside] subscribeNext:^(id x) {
+        NSLog(@"Singin Button : clicked");
+    }];
 }
 
 - (BOOL)isValidUsername:(NSString *)username {
