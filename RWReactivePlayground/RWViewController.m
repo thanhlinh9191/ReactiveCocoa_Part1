@@ -38,57 +38,36 @@
   
   // initially hide the failure message
   self.signInFailureText.hidden = YES;
-    
-//  [self.usernameTextField.rac_textSignal subscribeNext:^(id x) {
-//      //
-//      NSLog(@"%@",x);
-//  }];
-    
-    //1. filer operation
-    [[self.usernameTextField.rac_textSignal filter:^BOOL(id value) {
-        NSString *text = value;
-        return text.length>3;
-    }] subscribeNext:^(id x) {
-        NSLog(@"Filter Result: %@",x);
+  
+  //B2 : create valid state signals
+    //create signals
+    RACSignal *validUsernameSignal = [self.usernameTextField.rac_textSignal map:^id(NSString* text) {
+        return @([self isValidUsername:text]);
     }];
-    
-    //can  use a little case like this
-//    [[self.usernameTextField.rac_textSignal
-//      filter:^BOOL(id value) {
-//          NSString *text = value; // implicit cast
-//          return text.length > 3;
-//      }]
-//     subscribeNext:^(id x) {
-//         NSLog(@"%@", x);
-//     }];
-    
-    //can use blow block for simialr task
-//    RACSignal *usernameSourceSignal =
-//    self.usernameTextField.rac_textSignal;
-//    
-//    RACSignal *filteredUsername = [usernameSourceSignal
-//                                   filter:^BOOL(id value) {
-//                                       NSString *text = value;
-//                                       return text.length > 3;
-//                                   }];
-//    
-//    [filteredUsername subscribeNext:^(id x) {
-//        NSLog(@"%@", x);
-//    }];
-    
-    //2. map operation
-    [[[self.usernameTextField.rac_textSignal
-       map:^id(NSString *text) {
-           return @(text.length);
-       }]
-      filter:^BOOL(NSNumber *length) {
-          return [length integerValue] > 3;
-      }]
-     subscribeNext:^(id x) {
-         NSLog(@"Map Result: %@", x);
+    RACSignal *validPasswordSignal = [self.passwordTextField.rac_textSignal map:^id(NSString *text) {
+         return @([self isValidPassword:text]);
      }];
     
-    
+    //transform these signals so that they provide a nice background color
+    [[validPasswordSignal
+      map:^id(NSNumber *passwordValid) {
+          return [passwordValid boolValue] ? [UIColor clearColor] : [UIColor yellowColor];
+      }]
+     subscribeNext:^(UIColor *color) {
+         self.passwordTextField.backgroundColor = color;
+     }];
+    //can use a macro as below
+//    RAC(self.passwordTextField, backgroundColor) =
+//    [validPasswordSignal
+//     map:^id(NSNumber *passwordValid) {
+//         return [passwordValid boolValue] ? [UIColor clearColor] : [UIColor yellowColor];
+//     }];
+    //use macro for username
+    RAC(self.usernameTextField, backgroundColor) =
+    [validUsernameSignal
+     map:^id(NSNumber *usernameValid) {
+         return [usernameValid boolValue] ? [UIColor clearColor] : [UIColor yellowColor];
+     }];
 }
 
 - (BOOL)isValidUsername:(NSString *)username {
@@ -120,8 +99,9 @@
 // updates the enabled state and style of the text fields based on whether the current username
 // and password combo is valid
 - (void)updateUIState {
-  self.usernameTextField.backgroundColor = self.usernameIsValid ? [UIColor clearColor] : [UIColor yellowColor];
-  self.passwordTextField.backgroundColor = self.passwordIsValid ? [UIColor clearColor] : [UIColor yellowColor];
+    //comment these line code because of signals enabled
+//  self.usernameTextField.backgroundColor = self.usernameIsValid ? [UIColor clearColor] : [UIColor yellowColor];
+//  self.passwordTextField.backgroundColor = self.passwordIsValid ? [UIColor clearColor] : [UIColor yellowColor];
   self.signInButton.enabled = self.usernameIsValid && self.passwordIsValid;
 }
 
