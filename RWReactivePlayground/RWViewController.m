@@ -76,15 +76,39 @@
 //        NSLog(@"Singin Button : clicked");
 //    }];
     //B5 : create new signal for sign-in
+//    [[[self.signInButton
+//       rac_signalForControlEvents:UIControlEventTouchUpInside]
+//      map:^id(id x) {
+//          return [self signInSignal];
+//      }]
+//     subscribeNext:^(id x) {
+//         //example :  Sign in result: <RACDynamicSignal: 0x7f8dc25b5520> name: +createSignal:
+//        //This situation above is sometimes called the signal of signals;
+//         NSLog(@"Sign in result: %@", x);
+//     }];
+    
+    //B6. singal for signals
+    //short pipeline
+//    [[[self.signInButton
+//       rac_signalForControlEvents:UIControlEventTouchUpInside]
+//      flattenMap:^id(id x) {
+//          return [self signInSignal];
+//      }]
+//     subscribeNext:^(id x) {
+//         NSLog(@"Sign in result: %@", x);
+//     }];
+    //full pipeline
     [[[self.signInButton
        rac_signalForControlEvents:UIControlEventTouchUpInside]
-      map:^id(id x) {
+      flattenMap:^id(id x) {
           return [self signInSignal];
       }]
-     subscribeNext:^(id x) {
-         //example :  Sign in result: <RACDynamicSignal: 0x7f8dc25b5520> name: +createSignal:
-        //This situation above is sometimes called the signal of signals;
-         NSLog(@"Sign in result: %@", x);
+     subscribeNext:^(NSNumber *signedIn) {
+         BOOL success = [signedIn boolValue];
+         self.signInFailureText.hidden = success;
+         if (success) {
+             [self performSegueWithIdentifier:@"signInSuccess" sender:self];
+         }
      }];
 }
 
