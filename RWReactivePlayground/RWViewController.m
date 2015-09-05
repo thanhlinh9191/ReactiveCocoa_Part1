@@ -68,6 +68,16 @@
      map:^id(NSNumber *usernameValid) {
          return [usernameValid boolValue] ? [UIColor clearColor] : [UIColor yellowColor];
      }];
+    
+    //B3. combine  signals
+    RACSignal *signUpActiveSignal =
+    [RACSignal combineLatest:@[validUsernameSignal, validPasswordSignal]
+                      reduce:^id(NSNumber *usernameValid, NSNumber *passwordValid) {
+                          return @([usernameValid boolValue] && [passwordValid boolValue]);
+                      }];
+    [signUpActiveSignal subscribeNext:^(NSNumber *signupActive) {
+        self.signInButton.enabled = [signupActive boolValue];
+    }];
 }
 
 - (BOOL)isValidUsername:(NSString *)username {
@@ -99,10 +109,12 @@
 // updates the enabled state and style of the text fields based on whether the current username
 // and password combo is valid
 - (void)updateUIState {
-    //comment these line code because of signals enabled
+    //comment these line code because of signals enabled in B2
 //  self.usernameTextField.backgroundColor = self.usernameIsValid ? [UIColor clearColor] : [UIColor yellowColor];
 //  self.passwordTextField.backgroundColor = self.passwordIsValid ? [UIColor clearColor] : [UIColor yellowColor];
-  self.signInButton.enabled = self.usernameIsValid && self.passwordIsValid;
+    
+    //comment this line for B3
+ // self.signInButton.enabled = self.usernameIsValid && self.passwordIsValid;
 }
 
 - (void)usernameTextFieldChanged {
