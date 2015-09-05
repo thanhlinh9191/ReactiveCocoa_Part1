@@ -8,6 +8,7 @@
 
 #import "RWViewController.h"
 #import "RWDummySignInService.h"
+#import  <ReactiveCocoa.h>
 
 @interface RWViewController ()
 
@@ -37,6 +38,57 @@
   
   // initially hide the failure message
   self.signInFailureText.hidden = YES;
+    
+//  [self.usernameTextField.rac_textSignal subscribeNext:^(id x) {
+//      //
+//      NSLog(@"%@",x);
+//  }];
+    
+    //1. filer operation
+    [[self.usernameTextField.rac_textSignal filter:^BOOL(id value) {
+        NSString *text = value;
+        return text.length>3;
+    }] subscribeNext:^(id x) {
+        NSLog(@"Filter Result: %@",x);
+    }];
+    
+    //can  use a little case like this
+//    [[self.usernameTextField.rac_textSignal
+//      filter:^BOOL(id value) {
+//          NSString *text = value; // implicit cast
+//          return text.length > 3;
+//      }]
+//     subscribeNext:^(id x) {
+//         NSLog(@"%@", x);
+//     }];
+    
+    //can use blow block for simialr task
+//    RACSignal *usernameSourceSignal =
+//    self.usernameTextField.rac_textSignal;
+//    
+//    RACSignal *filteredUsername = [usernameSourceSignal
+//                                   filter:^BOOL(id value) {
+//                                       NSString *text = value;
+//                                       return text.length > 3;
+//                                   }];
+//    
+//    [filteredUsername subscribeNext:^(id x) {
+//        NSLog(@"%@", x);
+//    }];
+    
+    //2. map operation
+    [[[self.usernameTextField.rac_textSignal
+       map:^id(NSString *text) {
+           return @(text.length);
+       }]
+      filter:^BOOL(NSNumber *length) {
+          return [length integerValue] > 3;
+      }]
+     subscribeNext:^(id x) {
+         NSLog(@"Map Result: %@", x);
+     }];
+    
+    
 }
 
 - (BOOL)isValidUsername:(NSString *)username {
