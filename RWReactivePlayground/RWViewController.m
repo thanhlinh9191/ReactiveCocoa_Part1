@@ -17,8 +17,6 @@
 @property (weak, nonatomic) IBOutlet UIButton *signInButton;
 @property (weak, nonatomic) IBOutlet UILabel *signInFailureText;
 
-@property (nonatomic) BOOL passwordIsValid;
-@property (nonatomic) BOOL usernameIsValid;
 @property (strong, nonatomic) RWDummySignInService *signInService;
 
 @end
@@ -28,13 +26,7 @@
 - (void)viewDidLoad {
   [super viewDidLoad];
   
-  [self updateUIState];
-  
   self.signInService = [RWDummySignInService new];
-  
-  // handle text changes for both text fields
-  [self.usernameTextField addTarget:self action:@selector(usernameTextFieldChanged) forControlEvents:UIControlEventEditingChanged];
-  [self.passwordTextField addTarget:self action:@selector(passwordTextFieldChanged) forControlEvents:UIControlEventEditingChanged];
   
   // initially hide the failure message
   self.signInFailureText.hidden = YES;
@@ -103,28 +95,6 @@
                                 [self performSegueWithIdentifier:@"signInSuccess" sender:self];
                               }
                             }];
-}
-
-
-// updates the enabled state and style of the text fields based on whether the current username
-// and password combo is valid
-- (void)updateUIState {
-    //comment these line code because of signals enabled in B2
-//  self.usernameTextField.backgroundColor = self.usernameIsValid ? [UIColor clearColor] : [UIColor yellowColor];
-//  self.passwordTextField.backgroundColor = self.passwordIsValid ? [UIColor clearColor] : [UIColor yellowColor];
-    
-    //comment this line for B3
- // self.signInButton.enabled = self.usernameIsValid && self.passwordIsValid;
-}
-
-- (void)usernameTextFieldChanged {
-  self.usernameIsValid = [self isValidUsername:self.usernameTextField.text];
-  [self updateUIState];
-}
-
-- (void)passwordTextFieldChanged {
-  self.passwordIsValid = [self isValidPassword:self.passwordTextField.text];
-  [self updateUIState];
 }
 
 @end
