@@ -72,8 +72,32 @@
     }];
     
     //B4. Singal for control events
-    [[self.signInButton rac_signalForControlEvents:UIControlEventTouchUpInside] subscribeNext:^(id x) {
-        NSLog(@"Singin Button : clicked");
+//    [[self.signInButton rac_signalForControlEvents:UIControlEventTouchUpInside] subscribeNext:^(id x) {
+//        NSLog(@"Singin Button : clicked");
+//    }];
+    //B5 : create new signal for sign-in
+    [[[self.signInButton
+       rac_signalForControlEvents:UIControlEventTouchUpInside]
+      map:^id(id x) {
+          return [self signInSignal];
+      }]
+     subscribeNext:^(id x) {
+         //example :  Sign in result: <RACDynamicSignal: 0x7f8dc25b5520> name: +createSignal:
+        //This situation above is sometimes called the signal of signals;
+         NSLog(@"Sign in result: %@", x);
+     }];
+}
+
+//B5. CREATE SINGAL SINGAL
+//to adapt existing asynchronous APIs to be expressed as a signal.
+-(RACSignal *)signInSignal{
+    //
+    return [RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+       [self.signInService signInWithUsername:self.usernameTextField.text password:self.passwordTextField.text complete:^(BOOL success) {
+           [subscriber sendNext:@(success)];
+           [subscriber sendCompleted];
+       }];
+        return nil;
     }];
 }
 
